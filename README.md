@@ -1,5 +1,5 @@
 # The Genome Annotation System (Capstone Project) 
-Key Functions:
+# Key Functions:
 - The GAS will allow a user to perform the following functions:
 - Log in (via Globus Auth) to use the service -- Some aspects of the service are
 available only to registered users. Two classes of users will be supported: Free and
@@ -19,8 +19,8 @@ results for later retrieval. Users may view a list of their jobs (completed and 
 Free users may download results up to 10 minutes after their job has completed;
 thereafter their results will be archived and only available to them if they convert to a
 Premium user. Premium users will always have all their data available for download.
-System Components
-The GAS will comprise the following components:
+# System Components
+- The GAS will comprise the following components:
 - An object store for input files, annotated (result) files, and job log files.
 - A key-value store for persisting information on annotation jobs.
 - A low cost, highly-durable object store for archiving the data of Free users.
@@ -28,8 +28,7 @@ The GAS will comprise the following components:
 - A service that runs AnnTools for annotation.
 - A web application for users to interact with the GAS.
 - A set of message queues and notification topics for coordinating system activity.
-The diagram below shows the various GAS components/services and interactions:
-GAS Scalability
+# GAS Scalability
 We anticipate that the GAS will be in very high demand (since it’s a brilliant system developed
 by brilliant students), and that demand will be variable over the course of any given time period.
 Hence, the GAS will use elastic compute infrastructure to minimize cost during periods of low
@@ -49,8 +48,7 @@ excess web servers.
 running within a separate virtual private cloud). At minimum this pool of so-called “worker
 nodes” will contain two nodes (EC2 instances). Additional instances will be launched and
 added to (or removed from) the worker pool, based on the number of requests in the job
-queue. The annotator servers store the state of running jobs locally (as implemented in
-homework assignments) -- in this sense they are not stateless like the web app servers.
+queue. The annotator servers store the state of running jobs locally -- in this sense they are not stateless like the web app servers.
 If a job fails to complete it will leave the system in an inconsistent state, but it’s a state
 from which we can recover relatively easily.
 The GAS Today and Tomorrow
@@ -66,8 +64,4 @@ Premium.
 - Add load balancer and scaling rules to the web server farm.
 - Add scaling rules to the annotator farm.
 - Evaluate GAS performance under heavy/variable load.
-In addition, we will add some scripts to automate deployment of our entire execution
-environment.
-Note: You are responsible only for the items in bold above. The remainder are already
-completed and provided for you. In addition, we are providing you with all the HTML templates
-you will need so you can focus on core system functiona
+
