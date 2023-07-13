@@ -51,17 +51,5 @@ added to (or removed from) the worker pool, based on the number of requests in t
 queue. The annotator servers store the state of running jobs locally -- in this sense they are not stateless like the web app servers.
 If a job fails to complete it will leave the system in an inconsistent state, but it’s a state
 from which we can recover relatively easily.
-The GAS Today and Tomorrow
-Over the course of the past few weeks we've built many of the GAS components. To get to our
-final destination, we will do the following:
-- Create a robust (multi-threaded) and secure runtime environment for our web server.
-- Add user registration, authentication, and authorization mechanisms.
-- Add mechanisms for handling completion and notification of annotation jobs.
-- Enhance the listing of a user’s annotation jobs.
-- Add ability to download results and view the annotation log file.
-- Archive Free users’ data (to AWS Glacier), and restore it if they convert to
-Premium.
-- Add load balancer and scaling rules to the web server farm.
-- Add scaling rules to the annotator farm.
-- Evaluate GAS performance under heavy/variable load.
+
 
