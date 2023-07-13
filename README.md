@@ -1,33 +1,72 @@
-# gas-framework
-An enhanced web framework (based on [Flask](http://flask.pocoo.org/)) for use in the capstone project. Adds robust user authentication (via [Globus Auth](https://docs.globus.org/api/auth)), modular templates, and some simple styling based on [Bootstrap](http://getbootstrap.com/).
-
-Directory contents are as follows:
-* `/web` - The GAS web app files
-* `/ann` - Annotator files
-* `/util` - Utility scripts for notifications, archival, and restoration
-* `/aws` - AWS user data files
-
-1. Archive Process: 
-  1. The system will send the message to SNS job_complete when a job is completed and it will distribute the message to the SQS archive. There is 5 min delay in archiving the SQS message receiving to allow the free user to download 
-     their result file. 
-  2. The archive.py will continuously check 
-  for messages in the SQS and process them. The user's role will be determined when processing the message and will archive the file if the user is 
-  free. If the user is premium, the message will be deleted without further action.
-  Here is the archive status: 
-  a. The file will be uploaded to the glacier 
-  b. The file will be deleted after the upload is complete 
-  c. The database will be updated with the archive ID and archive status and S3 key result file will be removed. 
-  d. Delete the message in the archive SQS 
-  
- 2. Restore Process: 
-  1. When a POST request is sent from the /subscribe endpoint, a message will be sent to restore SQS. 
-  2.restore.py will continually check for the messages and process them. If the user is premium, a restore process will be started and a message will be sent to restore the SNS subscribed to by the thaw SQS. 
-  Here is the restoration process: 
-  a. Once the thaw SQS retrieved the message, We will scan the database and find out if all jobs match the current user_id get from the message. 
-  b. We will use the archive_id to restore each file associated with the current user and if the archive status is None, which means the file is not archived then we skip this file. The default is expediated and if exception occurs then switch to standard 
-  c. An SNS will be provided to the Glacier and once the retrieval is completed, the SNS will notify the thaw SQS. 
-  d. The thaw SQS will continuously check the new messages and use archive_id to match the job information in the database. 
-  e. After the file is decoded, the thaw.py will restore the file using the S3 key result file get by replacing the extension of the S3 key log file to store the file in S3. 
-  f. The database will be updated with the removed S3 key result file and the archive_id and archive_status column will be removed. 
-  g. thaw.py will then delete the file in Glacier using the archive id if the restoration is completed. 
-  h. Delete the message in thaw SQS
+Key Functions
+When completed, the GAS will allow a user to perform the following functions:
+● Log in (via Globus Auth) to use the service -- Some aspects of the service are
+available only to registered users. Two classes of users will be supported: Free and
+Premium. Premium users will have access to additional functionality, beyond that
+available to Free users.
+● Upgrade from a Free to a Premium user -- Premium users will be required to provide a
+credit card for payment of the service subscription. Previously we would integrate with
+Stripe for payment processing, but we’ve cut that due to the shortened project timeline.
+● Submit an annotation job -- Free users may only submit jobs of up to a certain size.
+Premium users may submit any size job. If a Free user submits an oversized job, the
+system will refuse it and will prompt the user to convert to a Premium user.
+● Receive notifications when annotation jobs finish -- When their annotation request is
+complete, the GAS will send users an email that includes a link where they can view the
+log file and download the results file.
+● Browse jobs and download annotation results -- The GAS will store annotation
+results for later retrieval. Users may view a list of their jobs (completed and running).
+Free users may download results up to 10 minutes after their job has completed;
+thereafter their results will be archived and only available to them if they convert to a
+Premium user. Premium users will always have all their data available for download.
+System Components
+The GAS will comprise the following components:
+- An object store for input files, annotated (result) files, and job log files.
+- A key-value store for persisting information on annotation jobs.
+- A low cost, highly-durable object store for archiving the data of Free users.
+- A relational database for user account information.
+- A service that runs AnnTools for annotation.
+- A web application for users to interact with the GAS.
+- A set of message queues and notification topics for coordinating system activity.
+The diagram below shows the various GAS components/services and interactions:
+GAS Scalability
+We anticipate that the GAS will be in very high demand (since it’s a brilliant system developed
+by brilliant students), and that demand will be variable over the course of any given time period.
+Hence, the GAS will use elastic compute infrastructure to minimize cost during periods of low
+demand and to meet expected user service levels during peak demand periods. We will build
+elasticity into two areas of the GAS:
+1. On the front end, the web application will be delivered by multiple servers running within
+a load balancer. All requests will be received at a single domain name/IP address,
+namely that of the load balancer. The load balancer will distribute requests across a pool
+of identically configured, stateless, web servers running on EC2 instances. At minimum,
+the load balancer will have two web server instances running across two availability
+zones, providing capacity and ensuring availability in the event of failure. If demand on
+either web server exceeds certain thresholds, the GAS will automatically launch
+additional web servers and place them in the load balancer pool. When demand remains
+below a certain threshold for a specified period of time, the GAS will terminate the
+excess web servers.
+2. On the back end, the annotator service will be delivered by multiple servers (optionally
+running within a separate virtual private cloud). At minimum this pool of so-called “worker
+nodes” will contain two nodes (EC2 instances). Additional instances will be launched and
+added to (or removed from) the worker pool, based on the number of requests in the job
+queue. The annotator servers store the state of running jobs locally (as implemented in
+homework assignments) -- in this sense they are not stateless like the web app servers.
+If a job fails to complete it will leave the system in an inconsistent state, but it’s a state
+from which we can recover relatively easily.
+The GAS Today and Tomorrow
+Over the course of the past few weeks we've built many of the GAS components. To get to our
+final destination, we will do the following:
+- Create a robust (multi-threaded) and secure runtime environment for our web server.
+- Add user registration, authentication, and authorization mechanisms.
+- Add mechanisms for handling completion and notification of annotation jobs.
+- Enhance the listing of a user’s annotation jobs.
+- Add ability to download results and view the annotation log file.
+- Archive Free users’ data (to AWS Glacier), and restore it if they convert to
+Premium.
+- Add load balancer and scaling rules to the web server farm.
+- Add scaling rules to the annotator farm.
+- Evaluate GAS performance under heavy/variable load.
+In addition, we will add some scripts to automate deployment of our entire execution
+environment.
+Note: You are responsible only for the items in bold above. The remainder are already
+completed and provided for you. In addition, we are providing you with all the HTML templates
+you will need so you can focus on core system functiona
