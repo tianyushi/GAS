@@ -1,9 +1,10 @@
+# The Genome Annotation System (Capstone Project) 
 Key Functions
 When completed, the GAS will allow a user to perform the following functions:
 ● Log in (via Globus Auth) to use the service -- Some aspects of the service are
 available only to registered users. Two classes of users will be supported: Free and
 Premium. Premium users will have access to additional functionality, beyond that
-available to Free users.
+available to Free users. 
 ● Upgrade from a Free to a Premium user -- Premium users will be required to provide a
 credit card for payment of the service subscription. Previously we would integrate with
 Stripe for payment processing, but we’ve cut that due to the shortened project timeline.
