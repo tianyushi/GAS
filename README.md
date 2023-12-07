@@ -1,6 +1,5 @@
 # The Genome Annotation System (GAS) 
 # Key Functions:
-- This is a MPCS capstone project
 - The GAS will allow a user to perform the following functions:
 - Log in (via Globus Auth) to use the service -- Some aspects of the service are
 available only to registered users. Two classes of users will be supported: Free and
